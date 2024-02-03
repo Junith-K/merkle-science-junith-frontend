@@ -1428,7 +1428,7 @@ const dummy_response = {
                     "name": "India"
                 },
                 "date": {
-                    "iso": "2024-10-10",
+                    "iso": "2024-10-09",
                     "datetime": {
                         "year": 2024,
                         "month": 10,
