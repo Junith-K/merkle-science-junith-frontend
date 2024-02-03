@@ -1,3 +1,31 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+* {
+scrollbar-color: #adb2b9 #e2e8f0;
+}
+
+::-webkit-scrollbar {
+width: 12px;
+}
+
+::-webkit-scrollbar-track {
+background-color: #e2e8f0;
+}
+
+::-webkit-scrollbar-thumb {
+background-color: #cbd5e0;
+border-radius: 6px;
+}
+
+.dark-mode-scroll {
+scrollbar-color: #4a5568 #2d3748;
+}
+
+.dark-mode-scroll::-webkit-scrollbar-track {
+background-color: #2d3748;
+}
+
+.dark-mode-scroll::-webkit-scrollbar-thumb {
+background-color: #4a5568;
+}

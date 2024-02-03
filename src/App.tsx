@@ -1,163 +1,120 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./App.css";
-import generateCalendarMatrix from "./utils/generateCalendarMatrix";
 import { countries } from "./constants/countries";
-import { dummy_response } from "./constants/dummy_data";
+import { RiMoonFill, RiSunFill } from 'react-icons/ri';
+import useCalendar from "./hooks/useCalendar";
+import YearSelector from "./components/YearSelector";
+import MonthSelector from "./components/MonthSelector";
+import CountrySelector from "./components/CountrySelector";
+import CalendarCell from "./components/CalendarCell";
+import CalendarHeader from "./components/CalendarHeader";
 
 const App: React.FC = () => {
-  const [selectedYear, setSelectedYear] = useState<number>(
-    new Date().getFullYear()
-  );
-  const [selectedMonth, setSelectedMonth] = useState<number>(
-    new Date().getMonth()
-  );
-  const [selectedCountry, setSelectedCountry] = useState<string>("IN");
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
-  const [holidays, setHolidays] = useState<Array<any>>([]);
-
-  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedYear(parseInt(event.target.value, 10));
-  };
-
-  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedMonth(parseInt(event.target.value, 10));
-  };
-
-  const handleCountryChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCountry(event.target.value);
-  };
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
-  useEffect(() => {
-    const fetchHolidays = async () => {
-      try {
-        // Simulating API call with dummy data
-        // const response = await fetch(`https://calendarific.com/api/v2/holidays?&api_key=uq9VLD3QZlaN57dtCFGSzwJHjgY2oTXo&country=${selectedCountry}&year=${selectedYear}`);
-        // const data = await response.json();
-
-        // Using dummy data instead of API call
-        const data = dummy_response;
-
-        if (data.meta.code === 200) {
-          setHolidays(data.response.holidays);
-        } else {
-          console.error("Error fetching holidays:", data.meta.code);
-        }
-      } catch (error) {
-        console.error("Error fetching holidays:", error);
-      }
-    };
-
-    fetchHolidays();
-  }, [selectedYear, selectedCountry]);
-
-  const calendarMatrix = generateCalendarMatrix(selectedMonth, selectedYear);
+  const {
+    selectedYear,
+    selectedMonth,
+    selectedCountry,
+    isDarkMode,
+    holidays,
+    handleYearChange,
+    handleMonthChange,
+    handleCountryChange,
+    toggleDarkMode,
+    handleTodayClick,
+    handlePrevYear,
+    handlePrevMonth,
+    handleNextMonth,
+    handleNextYear,
+    calendarMatrix,
+    selectedDate,
+    handleCellClick,
+  } = useCalendar();
 
   return (
     <div
       className={`flex flex-col items-center justify-center ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+        isDarkMode ? "bg-gray-900 text-white dark-mode-scroll" : "bg-gray-100 text-gray-900"
       }`}
     >
-      <div className="mb-4">
-        <label
-          htmlFor="year"
-          className={`mr-2 text-lg font-semibold ${
-            isDarkMode ? "text-white" : "text-gray-900"
-          }`}
+      <div className={`flex justify-between items-center w-full px-4 py-3 ${
+          isDarkMode
+            ? "bg-gray-700 text-white"
+            : "bg-gray-200 text-gray-900"
+      }`}>
+        <div>Calendar UI</div>
+        <button
+          onClick={toggleDarkMode}
+          className={`h-min px-4 py-2 ${
+            isDarkMode
+              ? "bg-gray-700 text-white"
+              : "bg-gray-200 text-gray-900"
+          } flex items-center justify-center transition duration-300`}
         >
-          Select Year:
-        </label>
-        <select
-          id="year"
-          onChange={handleYearChange}
-          value={selectedYear}
-          className={`p-2 ${
-            isDarkMode ? "bg-gray-800 text-white" : "bg-gray-200 text-gray-900"
-          }`}
-        >
-          {Array.from({ length: 10 }, (_, index) => (
-            <option key={index} value={selectedYear - 5 + index}>
-              {selectedYear - 5 + index}
-            </option>
-          ))}
-        </select>
+          {isDarkMode ? <RiSunFill /> : <RiMoonFill />}
+        </button>
       </div>
-      <div className="mb-4">
-        <label
-          htmlFor="month"
-          className={`mr-2 text-lg font-semibold ${
-            isDarkMode ? "text-white" : "text-gray-900"
-          }`}
+      
+      <div className="mb-2 w-full flex flex-col sm:flex-row p-4 justify-around items-center font-light text-[9px] sm:text-[11px] md:text-[13px] lg:text-sm xl:text-[16px]">
+        <YearSelector
+          selectedYear={selectedYear}
+          onYearChange={handleYearChange}
+          isDarkMode={isDarkMode}
+        />
+        <MonthSelector
+          selectedMonth={selectedMonth}
+          onMonthChange={handleMonthChange}
+          isDarkMode={isDarkMode}
+        />
+        <CountrySelector
+          selectedCountry={selectedCountry}
+          onCountryChange={handleCountryChange}
+          countries={countries}
+          isDarkMode={isDarkMode}
+        />
+        <button
+          onClick={handleTodayClick}
+          className={`h-min px-4 py-2 max-sm:mb-2 ${
+            isDarkMode
+              ? "bg-gray-700 text-white"
+              : "bg-gray-200 text-gray-900"
+          } rounded-full transition duration-300`}
         >
-          Select Month:
-        </label>
-        <select
-          id="month"
-          onChange={handleMonthChange}
-          value={selectedMonth}
-          className={`p-2 ${
-            isDarkMode ? "bg-gray-800 text-white" : "bg-gray-200 text-gray-900"
-          }`}
-        >
-          {Array.from({ length: 12 }, (_, index) => (
-            <option key={index} value={index}>
-              {new Date(2000, index, 1).toLocaleString("default", {
-                month: "long",
-              })}
-            </option>
-          ))}
-        </select>
+          Today
+        </button>
       </div>
-      <div className="mb-4">
-        <label
-          htmlFor="country"
-          className={`mr-2 text-lg font-semibold ${
-            isDarkMode ? "text-white" : "text-gray-900"
-          }`}
-        >
-          Select Country:
-        </label>
-        <select
-          id="country"
-          onChange={handleCountryChange}
-          value={selectedCountry}
-          className={`p-2 ${
-            isDarkMode ? "bg-gray-800 text-white" : "bg-gray-200 text-gray-900"
-          }`}
-        >
-          {countries.map((country) => (
-            <option key={country.code} value={country.code}>
-              {country.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      
       <div
         className={`text-center p-4 rounded-lg shadow-lg ${
           isDarkMode ? "bg-gray-800" : "bg-white"
         }`}
       >
         <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={() =>
-              setSelectedMonth((prevMonth) =>
-                prevMonth === 0 ? 11 : prevMonth - 1
-              )
-            }
-            className={`p-2 ${
-              isDarkMode
-                ? "bg-gray-700 text-white"
-                : "bg-gray-200 text-gray-900"
-            } rounded-full transition duration-300`}
-          >
-            Prev Month
-          </button>
+          <div>
+            <button
+              onClick={handlePrevYear}
+              disabled={selectedYear === 1930}
+              className={`p-2 mr-2 font-light text-[9px] sm:text-[11px] md:text-[13px] lg:text-sm xl:text-[16px] ${
+                isDarkMode
+                  ? "bg-gray-700 text-white"
+                  : "bg-gray-200 text-gray-900"
+              } rounded-full transition duration-300 ${selectedYear === 1930 ? 'cursor-not-allowed' : ''}`}
+            >
+              Prev Year
+            </button>
+            <button
+              onClick={handlePrevMonth}
+              className={`p-2 font-light text-[9px] sm:text-[11px] md:text-[13px] lg:text-sm xl:text-[16px] ${
+                isDarkMode
+                  ? "bg-gray-700 text-white"
+                  : "bg-gray-200 text-gray-900"
+              } rounded-full transition duration-300`}
+            >
+              Prev Month
+            </button>
+          </div>
+
           <h2
-            className={`text-2xl font-semibold ${
+            className={`text-[15px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] font-semibold ${
               isDarkMode ? "text-white" : "text-gray-900"
             }`}
           >
@@ -166,75 +123,47 @@ const App: React.FC = () => {
               year: "numeric",
             })}
           </h2>
-          <button
-            onClick={() =>
-              setSelectedMonth((prevMonth) =>
-                prevMonth === 11 ? 0 : prevMonth + 1
-              )
-            }
-            className={`p-2 ${
-              isDarkMode
-                ? "bg-gray-700 text-white"
-                : "bg-gray-200 text-gray-900"
-            } rounded-full transition duration-300`}
-          >
-            Next Month
-          </button>
-          <button
-            onClick={toggleDarkMode}
-            className={`p-2 ${
-              isDarkMode
-                ? "bg-gray-700 text-white"
-                : "bg-gray-200 text-gray-900"
-            } rounded-full transition duration-300`}
-          >
-            {isDarkMode ? "Light" : "Dark"} Mode
-          </button>
+          <div>
+            <button
+              onClick={handleNextMonth}
+              className={`p-2 mr-2 font-light text-[9px] sm:text-[11px] md:text-[13px] lg:text-sm xl:text-[16px] ${
+                isDarkMode
+                  ? "bg-gray-700 text-white"
+                  : "bg-gray-200 text-gray-900"
+              } rounded-full transition duration-300`}
+            >
+              Next Month
+            </button>
+            <button
+              onClick={handleNextYear}
+              disabled={selectedYear === 2030}
+              className={`p-2 font-light text-[9px] sm:text-[11px] md:text-[13px] lg:text-sm xl:text-[16px] ${
+                isDarkMode
+                  ? "bg-gray-700 text-white"
+                  : "bg-gray-200 text-gray-900"
+              } rounded-full transition duration-300 ${selectedYear === 2030 ? 'cursor-not-allowed' : ''}`}
+            >
+              Next Year
+            </button>
+          </div>
         </div>
-        <table className="table-auto border-collapse w-full">
-          <thead>
-            <tr className={`${isDarkMode ? "bg-gray-700" : "bg-gray-200"}`}>
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-                (day, index) => (
-                  <th
-                    key={index}
-                    className={`p-6 border border-gray-600 ${
-                      isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
-                  >
-                    {day}
-                  </th>
-                )
-              )}
-            </tr>
-          </thead>
+        <table className="">
+          <CalendarHeader  isDarkMode={isDarkMode} />
           <tbody>
             {calendarMatrix.map((week, weekIndex) => (
               <tr key={weekIndex}>
-                {week.map((day, dayIndex) => {
-                  const date = new Date(selectedYear, selectedMonth, day, 6);
-                  const holiday = holidays.find((h) =>
-                    h.date.iso==date.toISOString().split('T')[0]
-                  );
-
-                  return (
-                    <td
-                      key={dayIndex}
-                      className={`p-6 border border-gray-600 ${
-                        day === 0 ? "bg-gray-400" : ""
-                      } ${isDarkMode ? "text-white" : "text-gray-900"}`}
-                    >
-                      {day !== 0 ? (
-                        <div>
-                          <span>{day}</span>
-                          {holiday && <p className="text-sm">{holiday.name}</p>}
-                        </div>
-                      ) : (
-                        ""
-                      )}
-                    </td>
-                  );
-                })}
+                {week.map((day, dayIndex) => (
+                  <CalendarCell
+                  key={dayIndex}
+                  day={day}
+                  selectedYear={selectedYear}
+                  selectedMonth={selectedMonth}
+                  holidays={holidays}
+                  isDarkMode={isDarkMode}
+                  selectedDate={selectedDate}
+                  onCellClick={handleCellClick}
+                />
+                ))}
               </tr>
             ))}
           </tbody>
