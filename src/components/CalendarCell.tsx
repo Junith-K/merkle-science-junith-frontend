@@ -1,6 +1,4 @@
-import React, { useState } from "react";
-
-// ... (existing imports)
+import React from "react";
 
 interface CalendarCellProps {
   day: number;
@@ -33,10 +31,10 @@ const CalendarCell: React.FC<CalendarCellProps> = ({
     backgroundColor:
       selectedDate && selectedDate.toDateString() === date.toDateString()
         ? isDarkMode
-          ? "#4B5563" // Your desired color for selected cell in dark mode
-          : "#D1D5DB" // Your desired color for selected cell in light mode
+          ? "#4B5563"
+          : "#D1D5DB"
         : currentDate.toDateString() === date.toDateString()
-        ? "#79b6f7" // Your desired color for today's date
+        ? "#79b6f7"
         : "",
   };
 

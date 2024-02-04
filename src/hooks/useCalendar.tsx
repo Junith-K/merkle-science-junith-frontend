@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import generateCalendarMatrix from "../utils/generateCalendarMatrix";
 
-const API_KEY = "uq9VLD3QZlaN57dtCFGSzwJHjgY2oTXo";
+const API_KEY = "T1eB9af9ESYAMw73ht9lddir7TDD1fcy";
 const API_URL = "https://calendarific.com/api/v2/holidays";
 
 const useCalendar = () => {
@@ -12,13 +12,12 @@ const useCalendar = () => {
   const [selectedMonth, setSelectedMonth] = useState<number>(
     new Date().getMonth()
   );
-  const [selectedCountry, setSelectedCountry] = useState<string>("US"); // Default to US
+  const [selectedCountry, setSelectedCountry] = useState<string>("IN");
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [cachedHolidays, setCachedHolidays] = useState<{ [key: string]: any }>({});
 
-  // Debouncing function
   const debounce = (func: Function, delay: number) => {
     let timeoutId: NodeJS.Timeout;
     return function (...args: any[]) {
