@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import axios from "axios";
 import generateCalendarMatrix from "../utils/generateCalendarMatrix";
-import { dummy_response } from "../constants/dummy_data";
+
+const API_KEY = "uq9VLD3QZlaN57dtCFGSzwJHjgY2oTXo";
+const API_URL = "https://calendarific.com/api/v2/holidays";
 
 const useCalendar = () => {
   const [selectedYear, setSelectedYear] = useState<number>(
@@ -9,17 +12,28 @@ const useCalendar = () => {
   const [selectedMonth, setSelectedMonth] = useState<number>(
     new Date().getMonth()
   );
-  const [selectedCountry, setSelectedCountry] = useState<string>("IN");
+  const [selectedCountry, setSelectedCountry] = useState<string>("US"); // Default to US
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
-  const [holidays, setHolidays] = useState<Array<any>>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [cachedHolidays, setCachedHolidays] = useState<{ [key: string]: any }>({});
+
+  // Debouncing function
+  const debounce = (func: Function, delay: number) => {
+    let timeoutId: NodeJS.Timeout;
+    return function (...args: any[]) {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
+    };
+  };
 
   const handleCellClick = (date: Date) => {
     setSelectedDate(date);
   };
-  const handleYearChange = (year: number) => {
+
+  const handleYearChange = debounce((year: number) => {
     setSelectedYear(year);
-  };
+  }, 1000);
 
   const handleMonthChange = (month: number) => {
     setSelectedMonth(month);
@@ -55,24 +69,48 @@ const useCalendar = () => {
     setSelectedYear((prevYear) => (prevYear < 2030 ? prevYear + 1 : prevYear));
   };
 
-  useEffect(() => {
-    const fetchHolidays = async () => {
-      try {
-        // Simulating API call with dummy data
-        const data = dummy_response;
-
-        if (data.meta.code === 200) {
-          setHolidays(data.response.holidays);
+  const fetchHolidays = async () => {
+    try {
+      setLoading(true);
+      const cacheKey = `${selectedCountry}-${selectedYear}`;
+      if (cachedHolidays[cacheKey]) {
+        setCachedHolidays((prevCachedHolidays) => ({
+          ...prevCachedHolidays,
+          [cacheKey]: prevCachedHolidays[cacheKey],
+        }));
+      } else {
+        const response = await axios.get(API_URL, {
+          params: {
+            api_key: API_KEY,
+            country: selectedCountry,
+            year: selectedYear,
+          },
+        });
+  
+        if (response.status === 200) {
+          const holidaysData = response.data.response.holidays;
+          setCachedHolidays((prevCachedHolidays) => ({
+            ...prevCachedHolidays,
+            [cacheKey]: holidaysData,
+          }));
         } else {
-          console.error("Error fetching holidays:", data.meta.code);
+          console.error("Error fetching holidays:", response.status);
         }
-      } catch (error) {
-        console.error("Error fetching holidays:", error);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching holidays:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchHolidays();
   }, [selectedYear, selectedCountry]);
+
+  const holidays = useMemo(() => {
+    return cachedHolidays[`${selectedCountry}-${selectedYear}`] || [];
+  }, [cachedHolidays, selectedCountry, selectedYear]);
 
   const calendarMatrix = generateCalendarMatrix(selectedMonth, selectedYear);
 
@@ -84,6 +122,7 @@ const useCalendar = () => {
     holidays,
     calendarMatrix,
     selectedDate,
+    loading,
     handleYearChange,
     handleMonthChange,
     handleCountryChange,

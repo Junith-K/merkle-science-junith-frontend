@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import "./App.css";
 import { countries } from "./constants/countries";
 import { RiMoonFill, RiSunFill } from 'react-icons/ri';
@@ -8,7 +8,8 @@ import MonthSelector from "./components/MonthSelector";
 import CountrySelector from "./components/CountrySelector";
 import CalendarCell from "./components/CalendarCell";
 import CalendarHeader from "./components/CalendarHeader";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const App: React.FC = () => {
   const {
     selectedYear,
@@ -16,6 +17,7 @@ const App: React.FC = () => {
     selectedCountry,
     isDarkMode,
     holidays,
+    loading,
     handleYearChange,
     handleMonthChange,
     handleCountryChange,
@@ -29,6 +31,11 @@ const App: React.FC = () => {
     selectedDate,
     handleCellClick,
   } = useCalendar();
+  useEffect(() => {
+    if (loading) {
+      toast.info("Loading holidays...",{autoClose: 1000});
+    }
+  }, [loading]);
 
   return (
     <div
@@ -84,7 +91,7 @@ const App: React.FC = () => {
       </div>
       
       <div
-        className={`text-center p-4 rounded-lg shadow-lg ${
+        className={`text-center mb-12 p-4 rounded-lg shadow-lg ${
           isDarkMode ? "bg-gray-800" : "bg-white"
         }`}
       >
@@ -147,7 +154,7 @@ const App: React.FC = () => {
             </button>
           </div>
         </div>
-        <table className="">
+        <table>
           <CalendarHeader  isDarkMode={isDarkMode} />
           <tbody>
             {calendarMatrix.map((week, weekIndex) => (
@@ -169,6 +176,7 @@ const App: React.FC = () => {
           </tbody>
         </table>
       </div>
+      <ToastContainer />
     </div>
   );
 };
